@@ -6,3 +6,5 @@ type User struct {
 }
 
 type Users []User
+
+var users = Users{}

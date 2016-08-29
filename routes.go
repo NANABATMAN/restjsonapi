@@ -16,26 +16,26 @@ type Routes []Route
 var routes = Routes{
 	Route{
 		"Create",
-		"GET",
+		"POST",
 		"/create",
 		Create,
 	},
-	//	Route{
-	//		"Read",
-	//		"GET",
-	//		"/read",
-	//		Read,
-	//	},
-	//	Route{
-	//		"Update",
-	//		"PUT",
-	//		"/update",
-	//		Update,
-	//	},
-	//	Route{
-	//		"Delete",
-	//		"DELETE",
-	//		"/delete",
-	//		Delete,
-	//	},
+	Route{
+		"Read",
+		"GET",
+		"/read/{username}",
+		Read,
+	},
+	Route{
+		"Update",
+		"PUT",
+		"/update",
+		Update,
+	},
+	Route{
+		"Delete",
+		"DELETE",
+		"/delete/{username}",
+		Delete,
+	},
 }
