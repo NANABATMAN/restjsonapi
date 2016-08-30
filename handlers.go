@@ -1,72 +1,42 @@
 package main
 
 import (
-	"encoding/json"
-	"log"
 	"net/http"
-	"strings"
+	"strconv"
+
+	"github.com/labstack/echo"
 )
 
-const (
-	READ   = "/read/"
-	DELETE = "/delete/"
-)
-
-func Create(res http.ResponseWriter, req *http.Request) {
-	var userStruct User
-	if decoder(res, req, &userStruct) != nil {
-		log.Println("Error! Cannot decode JSON!")
-		res.WriteHeader(500)
+func createUser(c echo.Context) error {
+	user := &User{
+		ID: seq,
 	}
-	users = append(users, userStruct)
+	if err := c.Bind(user); err != nil {
+		return err
+	}
+	users[user.ID] = user
+	seq++
+	return c.JSON(http.StatusCreated, user)
 }
 
-func Read(res http.ResponseWriter, req *http.Request) {
-	username := getUsername(req.URL.Path, READ)
-	for _, user := range users {
-		if user.Username == username {
-			res.Header().Set("Content-Type", "application/json; charset=utf-8")
-			encoder := json.NewEncoder(res)
-			err := encoder.Encode(user)
-			if err != nil {
-				log.Println("Error! Cannot encode JSON!")
-				res.WriteHeader(500)
-			}
-		}
-	}
+func getUser(c echo.Context) error {
+	id, _ := strconv.Atoi(c.Param("id"))
+	return c.JSON(http.StatusOK, users[id])
 }
 
-func Update(res http.ResponseWriter, req *http.Request) {
-	var userStruct User
-	if decoder(res, req, &userStruct) != nil {
-		log.Println("Error! Cannot decode JSON!")
-		res.WriteHeader(500)
+func updateUser(c echo.Context) error {
+	user := new(User)
+	if err := c.Bind(user); err != nil {
+		return err
 	}
-
-	for i, user := range users {
-		if user.Username == userStruct.Username {
-			users[i] = userStruct
-		}
-	}
+	id, _ := strconv.Atoi(c.Param("id"))
+	user.ID = id
+	users[id] = user
+	return c.JSON(http.StatusOK, users[id])
 }
 
-func Delete(res http.ResponseWriter, req *http.Request) {
-	username := getUsername(req.URL.Path, DELETE)
-	var deleteIndex int
-	for i, user := range users {
-		if user.Username == username {
-			deleteIndex = i
-		}
-	}
-	users = append(users[:deleteIndex], users[deleteIndex+1:]...)
-}
-
-func decoder(res http.ResponseWriter, req *http.Request, userStruct *User) error {
-	decoder := json.NewDecoder(req.Body)
-	err := decoder.Decode(userStruct)
-	return err
-}
-
-func getUsername(path string, pattern string) string {
-	return strings.Split(path, pattern)[1]
+func deleteUser(c echo.Context) error {
+	id, _ := strconv.Atoi(c.Param("id"))
+	delete(users, id)
+	return c.NoContent(http.StatusNoContent)
 }
