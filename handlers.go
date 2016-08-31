@@ -12,31 +12,41 @@ func createUser(c echo.Context) error {
 		ID: seq,
 	}
 	if err := c.Bind(user); err != nil {
-		return err
+		return c.NoContent(500)
 	}
-	users[user.ID] = user
+	users.RLock()
+	users.m[user.ID] = user
 	seq++
+	users.RUnlock()
 	return c.JSON(http.StatusCreated, user)
 }
 
 func getUser(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
-	return c.JSON(http.StatusOK, users[id])
+	users.RLock()
+	user := users.m[id]
+	users.RUnlock()
+	return c.JSON(http.StatusOK, user)
 }
 
 func updateUser(c echo.Context) error {
 	user := new(User)
 	if err := c.Bind(user); err != nil {
-		return err
+		return c.NoContent(500)
 	}
 	id, _ := strconv.Atoi(c.Param("id"))
 	user.ID = id
-	users[id] = user
-	return c.JSON(http.StatusOK, users[id])
+	users.RLock()
+	users.m[id] = user
+	u := users.m[id]
+	users.RUnlock()
+	return c.JSON(http.StatusOK, u)
 }
 
 func deleteUser(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
-	delete(users, id)
+	users.RLock()
+	delete(users.m, id)
+	users.RUnlock()
 	return c.NoContent(http.StatusNoContent)
 }
