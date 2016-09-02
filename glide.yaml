@@ -1,0 +1,15 @@
+package: github.com/NANABATMAN/restjsonapi
+import:
+- package: github.com/labstack/echo
+  subpackages:
+  - engine/standard
+  - middleware
+- package: github.com/stretchr/testify
+  subpackages:
+  - assert
+- package: golang.org/x/oauth2
+- package: github.com/dghubble/ctxh
+- package: github.com/dghubble/gologin
+  subpackages:
+  - github
+- package: github.com/dghubble/sessions
